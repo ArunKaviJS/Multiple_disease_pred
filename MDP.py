@@ -2,19 +2,32 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import pickle
-import matplotlib.pyplot as plt
+import boto3
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score,precision_score,mean_absolute_error,mean_squared_error 
+from sklearn.metrics import accuracy_score
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.tree import DecisionTreeClassifier,DecisionTreeRegressor
-from sklearn.linear_model import LinearRegression,LogisticRegression,Ridge,Lasso,ElasticNet
-from sklearn.ensemble import RandomForestClassifier,RandomForestRegressor ,VotingClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier ,VotingClassifier
 from imblearn.over_sampling import RandomOverSampler 
 from sklearn.preprocessing import MinMaxScaler
-from xgboost import XGBClassifier
-
 from sklearn.svm import SVC
 from streamlit_option_menu import option_menu
+from io import StringIO
+
+
+bucket_name = 'multiple-disease-s3'
+def get_s3_file(bucket_name, path):
+    try:
+        s3 = boto3.client('s3')  # No explicit credentials needed if IAM role is used
+        response = s3.get_object(Bucket=bucket_name, Key=path)
+        data = response['Body'].read().decode('utf-8')
+        return data
+    except Exception as e:
+        st.error(f"Error accessing S3 file: {e}")
+        return None
+
+
 ros=RandomOverSampler()
 scaler=MinMaxScaler((-1,1))
 scaler1=MinMaxScaler((-6,1))
@@ -47,7 +60,11 @@ if selected=='Parkinsons Predictions':
      st.title(":red[PARKINSON'S DISEASE PREDICTION]")   
     with col2:
      st.image(r'https://th.bing.com/th/id/OIP.FrbaFXWHa1A_ud4-xPlfNwHaL4?w=156&h=194&c=7&r=0&o=5&dpr=1.3&pid=1.7')
-    df=pd.read_csv(r"C:\Users\firea\Downloads\parkinsons.csv")
+    path='parkinsons.csv'
+    file=get_s3_file(bucket_name,path)
+    df=pd.read_csv(StringIO(file))
+
+    df=pd.read_csv(file)
     with open('parkinson.pkl','wb') as file:
         pickle.dump(df,file)
     with open('parkinson.pkl','rb') as file:
@@ -157,7 +174,10 @@ if selected=='Kidney Prediction':
     st.title(':red[KIDNEY DISEASE PREDICTION]')   
    with col2:
     st.image(r'https://th.bing.com/th/id/OIP.vxeXslFQ0Rr0TYGPlcWfxgHaLb?w=156&h=195&c=7&r=0&o=5&dpr=1.3&pid=1.7')
-   df1=pd.read_csv(r"C:\Users\firea\Downloads\Kidney.csv")
+   path1='Kidney.csv'
+   file1=get_s3_file(bucket_name,path1)
+
+   df1=pd.read_csv(StringIO(file1))
    feature=df1[['sc','bu','hemo','al','bp']]
    target1=df1['classification']
    colls=feature.columns
@@ -236,7 +256,10 @@ if selected=='Liver Prediction':
     st.title(':red[LIVER DISEASE PREDICTION]')
    with col2:
     st.image(r'https://th.bing.com/th/id/OIP.VmIE-LIbfDAO0jxNMY_JxwHaEl?w=260&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7')
-   df2=pd.read_csv(r"C:\Users\firea\Downloads\liver.csv")
+    path2='liver.csv'
+
+    file2=get_s3_file(bucket_name,path2)
+   df2=pd.read_csv(file2)
    feature=df2[['Total_Bilirubin','Direct_Bilirubin','Alkaline_Phosphotase','Aspartate_Aminotransferase','Albumin','Albumin_and_Globulin_Ratio']]
    target=df2['Dataset']
 
