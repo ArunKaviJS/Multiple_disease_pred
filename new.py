@@ -22,7 +22,7 @@ file = get_s3_file(bucket_name, path)
 if file:
  
  df = pd.read_csv(StringIO(file))
-  
+ st.dataframe(df)
 
 # Streamlit App
 st.title('S3 Data Extract')
