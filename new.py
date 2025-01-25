@@ -4,7 +4,7 @@ import boto3
 from io import StringIO
 
 # S3 file details
-path = 'Kidney.csv'
+path = 'parkinsons.csv'
 bucket_name = 'multiple-disease-s3'
 
 def get_s3_file(bucket_name, path):

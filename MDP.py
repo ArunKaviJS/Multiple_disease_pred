@@ -178,6 +178,7 @@ if selected=='Kidney Prediction':
    file1=get_s3_file(bucket_name,path1)
 
    df1=pd.read_csv(StringIO(file1))
+  
    feature=df1[['sc','bu','hemo','al','bp']]
    target1=df1['classification']
    colls=feature.columns
@@ -259,7 +260,9 @@ if selected=='Liver Prediction':
     path2='liver.csv'
 
     file2=get_s3_file(bucket_name,path2)
-   df2=pd.read_csv(file2)
+    df2=pd.read_csv(file2)
+  
+  
    feature=df2[['Total_Bilirubin','Direct_Bilirubin','Alkaline_Phosphotase','Aspartate_Aminotransferase','Albumin','Albumin_and_Globulin_Ratio']]
    target=df2['Dataset']
 
