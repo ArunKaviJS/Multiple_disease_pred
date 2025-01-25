@@ -16,11 +16,9 @@ def get_s3_file(bucket_name, path1):
     except Exception as e:
         st.error(f"Error accessing S3 file: {e}")
         return None
-with st.sidebar:
-   select=st.selectbox('select',['nav','arun'])
-if select=='nav':
- file1 = get_s3_file(bucket_name, path1)
- if file1:
+
+file1 = get_s3_file(bucket_name, path1)
+if file1:
  
   df1 = pd.read_csv(StringIO(file1))
   st.dataframe(df1)
@@ -37,9 +35,9 @@ def get_s3_file(bucket_name, path2):
         return None
 with st.sidebar:
    select=st.selectbox('select',['nav','arun'])
-if select=='nav':
- file2 = get_s3_file(bucket_name, path2)
- if file2:
+
+file2 = get_s3_file(bucket_name, path2)
+if file2:
  
   df2 = pd.read_csv(StringIO(file2))
   st.dataframe(df2)
