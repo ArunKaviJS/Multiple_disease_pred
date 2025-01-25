@@ -60,9 +60,9 @@ if selected=='Parkinsons Predictions':
      st.title(":red[PARKINSON'S DISEASE PREDICTION]")   
     with col2:
      st.image(r'https://th.bing.com/th/id/OIP.FrbaFXWHa1A_ud4-xPlfNwHaL4?w=156&h=194&c=7&r=0&o=5&dpr=1.3&pid=1.7')
-    path='parkinsons.csv'
-    file=get_s3_file(bucket_name,path)
-    df=pd.read_csv(StringIO(file))
+     path='parkinsons.csv'
+     file=get_s3_file(bucket_name,path)
+     df=pd.read_csv(StringIO(file))
 
     df=pd.read_csv(file)
     with open('parkinson.pkl','wb') as file:
