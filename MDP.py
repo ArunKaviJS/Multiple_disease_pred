@@ -60,9 +60,11 @@ if selected=='Parkinsons Predictions':
      st.title(":red[PARKINSON'S DISEASE PREDICTION]")   
     with col2:
      st.image(r'https://th.bing.com/th/id/OIP.FrbaFXWHa1A_ud4-xPlfNwHaL4?w=156&h=194&c=7&r=0&o=5&dpr=1.3&pid=1.7')
-     path='parkinsons.csv'
-     file=get_s3_file(bucket_name,path)
-     df=pd.read_csv(StringIO(file))
+     
+     
+    path='parkinsons.csv'
+    file=get_s3_file(bucket_name,path)
+    df=pd.read_csv(StringIO(file))
 
     df=pd.read_csv(file)
     with open('parkinson.pkl','wb') as file:
@@ -174,9 +176,10 @@ if selected=='Kidney Prediction':
     st.title(':red[KIDNEY DISEASE PREDICTION]')   
    with col2:
     st.image(r'https://th.bing.com/th/id/OIP.vxeXslFQ0Rr0TYGPlcWfxgHaLb?w=156&h=195&c=7&r=0&o=5&dpr=1.3&pid=1.7')
+   
+   
    path1='Kidney.csv'
    file1=get_s3_file(bucket_name,path1)
-
    df1=pd.read_csv(StringIO(file1))
   
    feature=df1[['sc','bu','hemo','al','bp']]
@@ -257,10 +260,10 @@ if selected=='Liver Prediction':
     st.title(':red[LIVER DISEASE PREDICTION]')
    with col2:
     st.image(r'https://th.bing.com/th/id/OIP.VmIE-LIbfDAO0jxNMY_JxwHaEl?w=260&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7')
-    path2='liver.csv'
-
-    file2=get_s3_file(bucket_name,path2)
-    df2=pd.read_csv(file2)
+    
+   path2='liver.csv'
+   file2=get_s3_file(bucket_name,path2)
+   df2=pd.read_csv(file2)
   
   
    feature=df2[['Total_Bilirubin','Direct_Bilirubin','Alkaline_Phosphotase','Aspartate_Aminotransferase','Albumin','Albumin_and_Globulin_Ratio']]
