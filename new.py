@@ -4,7 +4,7 @@ import boto3
 from io import StringIO
 
 # S3 file details
-
+st.title('S3 Data Extract')
 bucket_name = 'multiple-disease-s3'
 path = 'parkinsons.csv'
 def get_s3_file(bucket_name, path):
@@ -16,15 +16,16 @@ def get_s3_file(bucket_name, path):
     except Exception as e:
         st.error(f"Error accessing S3 file: {e}")
         return None
-    
-
-file = get_s3_file(bucket_name, path)
-if file:
+with st.sidebar:
+   select=st.selectbox('select',['nav','arun'])
+if select=='nav':
+ file = get_s3_file(bucket_name, path)
+ if file:
  
- df = pd.read_csv(StringIO(file))
- st.dataframe(df)
+  df = pd.read_csv(StringIO(file))
+  st.dataframe(df)
 
 # Streamlit App
-st.title('S3 Data Extract')
+
 
 
