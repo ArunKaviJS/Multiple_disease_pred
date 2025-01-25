@@ -26,6 +26,40 @@ def get_s3_file(bucket_name, path):
     except Exception as e:
         st.error(f"Error accessing S3 file: {e}")
         return None
+path1 = 'parkinsons.csv'
+def get_s3_file(bucket_name, path1):
+    try:
+        s3 = boto3.client('s3')  # No explicit credentials needed if IAM role is used
+        response = s3.get_object(Bucket=bucket_name, Key=path1)
+        data = response['Body'].read().decode('utf-8')
+        return data
+    except Exception as e:
+        st.error(f"Error accessing S3 file: {e}")
+        return None
+
+file1 = get_s3_file(bucket_name, path1)
+if file1:
+ 
+  df1 = pd.read_csv(StringIO(file1))
+  st.dataframe(df1)
+
+path2 = 'liver.csv'
+def get_s3_file(bucket_name, path2):
+    try:
+        s3 = boto3.client('s3')  # No explicit credentials needed if IAM role is used
+        response = s3.get_object(Bucket=bucket_name, Key=path2)
+        data = response['Body'].read().decode('utf-8')
+        return data
+    except Exception as e:
+        st.error(f"Error accessing S3 file: {e}")
+        return None
+
+
+file2 = get_s3_file(bucket_name, path2)
+if file2:
+ 
+  df2 = pd.read_csv(StringIO(file2))
+  st.dataframe(df2)
 
 
 ros=RandomOverSampler()
@@ -62,18 +96,14 @@ if selected=='Parkinsons Predictions':
      st.image(r'https://th.bing.com/th/id/OIP.FrbaFXWHa1A_ud4-xPlfNwHaL4?w=156&h=194&c=7&r=0&o=5&dpr=1.3&pid=1.7')
      
      
-    path='parkinsons.csv'
-    file=get_s3_file(bucket_name,path)
-    df=pd.read_csv(StringIO(file))
-
-    df=pd.read_csv(file)
+    
     with open('parkinson.pkl','wb') as file:
-        pickle.dump(df,file)
+        pickle.dump(df1,file)
     with open('parkinson.pkl','rb') as file:
         df=pickle.load(file)
     #SELECTING TARGET AND FEATURE COLUMN
-    feature=df.drop(['status','name'],axis=1)
-    target=df['status']
+    feature=df1.drop(['status','name'],axis=1)
+    target=df1['status']
     #balancing the data using randomoversampling
     feature_sampled,target_sampled=ros.fit_resample(feature,target)
     #FEATURE SCALING THE FEATURE COLUMN
@@ -178,12 +208,12 @@ if selected=='Kidney Prediction':
     st.image(r'https://th.bing.com/th/id/OIP.vxeXslFQ0Rr0TYGPlcWfxgHaLb?w=156&h=195&c=7&r=0&o=5&dpr=1.3&pid=1.7')
    
    
-   path1='Kidney.csv'
-   file1=get_s3_file(bucket_name,path1)
-   df1=pd.read_csv(StringIO(file1))
+   path='Kidney.csv'
+   file=get_s3_file(bucket_name,path)
+   df=pd.read_csv(StringIO(file))
   
-   feature=df1[['sc','bu','hemo','al','bp']]
-   target1=df1['classification']
+   feature=df[['sc','bu','hemo','al','bp']]
+   target1=df['classification']
    colls=feature.columns
    #HANDLING OULTILERS
    feature_handled=handle_outliers_iqr(feature,colls)
@@ -261,9 +291,7 @@ if selected=='Liver Prediction':
    with col2:
     st.image(r'https://th.bing.com/th/id/OIP.VmIE-LIbfDAO0jxNMY_JxwHaEl?w=260&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7')
     
-   path2='liver.csv'
-   file2=get_s3_file(bucket_name,path2)
-   df2=pd.read_csv(file2)
+  
   
   
    feature=df2[['Total_Bilirubin','Direct_Bilirubin','Alkaline_Phosphotase','Aspartate_Aminotransferase','Albumin','Albumin_and_Globulin_Ratio']]
