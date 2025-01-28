@@ -41,7 +41,7 @@ with st.sidebar:
         menu_title='Multiple Disease Prediction',
         options=['Parkinsons Predictions','Liver Prediction','Kidney Prediction'],
         icons=["housedoor",  "graphup", "fileearmark-zip","bookhalf"],
-        menu_icon='cast'
+        menu_icon='cast',
         default_index=0,
 
 
