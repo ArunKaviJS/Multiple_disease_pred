@@ -9,9 +9,9 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier ,VotingClassifier
-from imblearn.over_sampling import RandomOverSampler 
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.svm import SVC
+form imblearn.over_sampling import RandomOverSampler
 from streamlit_option_menu import option_menu
 from io import StringIO
 
@@ -40,7 +40,8 @@ with st.sidebar:
     selected=option_menu(
         menu_title='Multiple Disease Prediction',
         options=['Parkinsons Predictions','Liver Prediction','Kidney Prediction'],
-        icons=["house-door",  "graph-up", "file-earmark-zip","book-half"],
+        icons=["housedoor",  "graphup", "fileearmark-zip","bookhalf"],
+        menu_icon='cast'
         default_index=0,
 
 
@@ -337,7 +338,7 @@ if selected=='Liver Prediction':
    if st.button('Predict'):
      predict2=EVC2.predict(input_data)
      
-     if predict2=='1':
+     if predict2==1:
         st.error(f"Patient {name} has Liver disease")
      else:
         st.success(f"Patient {name} does not have Liver disease")

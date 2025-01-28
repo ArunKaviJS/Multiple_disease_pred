@@ -33,8 +33,7 @@ def get_s3_file(bucket_name, path2):
     except Exception as e:
         st.error(f"Error accessing S3 file: {e}")
         return None
-with st.sidebar:
-   select=st.selectbox('select',['nav','arun'])
+
 
 file2 = get_s3_file(bucket_name, path2)
 if file2:

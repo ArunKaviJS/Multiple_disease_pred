@@ -8,37 +8,74 @@ from sklearn.metrics import accuracy_score
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier, VotingClassifier
+from sklearn.ensemble import RandomForestClassifier ,VotingClassifier
 from imblearn.over_sampling import RandomOverSampler 
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.svm import SVC
 from streamlit_option_menu import option_menu
 from io import StringIO
 
-bucket_name = 'your-bucket-name'
 
+bucket_name = 'multiple-disease-s3'
 def get_s3_file(bucket_name, path):
     try:
-        s3 = boto3.client('s3')
+        s3 = boto3.client('s3')  # No explicit credentials needed if IAM role is used
         response = s3.get_object(Bucket=bucket_name, Key=path)
         data = response['Body'].read().decode('utf-8')
         return data
     except Exception as e:
         st.error(f"Error accessing S3 file: {e}")
         return None
+path1 = 'parkinsons.csv'
+def get_s3_file(bucket_name, path1):
+    try:
+        s3 = boto3.client('s3')  # No explicit credentials needed if IAM role is used
+        response = s3.get_object(Bucket=bucket_name, Key=path1)
+        data = response['Body'].read().decode('utf-8')
+        return data
+    except Exception as e:
+        st.error(f"Error accessing S3 file: {e}")
+        return None
 
-ros = RandomOverSampler()
-scaler = MinMaxScaler((-1, 1))
-scaler1 = MinMaxScaler((-6, 1))
-scaler2 = MinMaxScaler((-0.2, 1))
+file1 = get_s3_file(bucket_name, path1)
+if file1:
+ 
+  df1 = pd.read_csv(StringIO(file1))
+  st.dataframe(df1)
+
+path2 = 'liver.csv'
+def get_s3_file(bucket_name, path2):
+    try:
+        s3 = boto3.client('s3')  # No explicit credentials needed if IAM role is used
+        response = s3.get_object(Bucket=bucket_name, Key=path2)
+        data = response['Body'].read().decode('utf-8')
+        return data
+    except Exception as e:
+        st.error(f"Error accessing S3 file: {e}")
+        return None
+
+
+file2 = get_s3_file(bucket_name, path2)
+if file2:
+ 
+  df2 = pd.read_csv(StringIO(file2))
+  st.dataframe(df2)
+
+
+ros=RandomOverSampler()
+scaler=MinMaxScaler((-1,1))
+scaler1=MinMaxScaler((-6,1))
+scaler2=MinMaxScaler((-0.2,1))
 
 with st.sidebar:
-    selected = option_menu(
+    selected=option_menu(
         menu_title='Multiple Disease Prediction',
-        options=['Parkinsons Predictions', 'Liver Prediction', 'Kidney Prediction'],
-        icons=["house-door", "graph-up", "file-earmark-zip", "book-half"],
+        options=['Parkinsons Predictions','Liver Prediction','Kidney Prediction'],
+        icons=["house-door",  "graph-up", "file-earmark-zip","book-half"],
         default_index=0,
-    )
+
+
+    )   
 
 def handle_outliers_iqr(rd, cols):
     for col in cols:
@@ -51,167 +88,288 @@ def handle_outliers_iqr(rd, cols):
         rd[col] = np.where(rd[col] > upper_bound, upper_bound, rd[col])
     return rd
 
-if selected == 'Parkinsons Predictions':
-    col1, col2 = st.columns(2)
+if selected=='Parkinsons Predictions':
+    col1,col2=st.columns(2)
     with col1:
-        st.title(":red[PARKINSON'S DISEASE PREDICTION]")   
+     st.title(":red[PARKINSON'S DISEASE PREDICTION]")   
     with col2:
-        st.image(r'https://th.bing.com/th/id/OIP.FrbaFXWHa1A_ud4-xPlfNwHaL4?w=156&h=194&c=7&r=0&o=5&dpr=1.3&pid=1.7')
-        path = 'parkinsons.csv'
-        file = get_s3_file(bucket_name, path)
-        df = pd.read_csv(StringIO(file))
-
-    feature = df.drop(['status', 'name'], axis=1)
-    target = df['status']
-
-    feature_sampled, target_sampled = ros.fit_resample(feature, target)
-    feature_x = scaler.fit_transform(feature_sampled)
-    target_y = target_sampled
-
-    feature_train, feature_test, target_train, target_test = train_test_split(feature_x, target_y)
-
-    LR = LogisticRegression(C=0.4, max_iter=1000, solver='liblinear')
-    DTR = DecisionTreeClassifier()
-    KNN = KNeighborsClassifier()
-    RFC = RandomForestClassifier(criterion='entropy', random_state=14)
-    SVM = SVC(probability=True)
-
-    EVC = VotingClassifier(estimators=[('LR', LR), ('DTR', DTR), ('KNN', KNN), ('RFC', RFC), ('SVM', SVM)], voting='hard')
-    EVC.fit(feature_train, target_train)
-
-    target_predevc = EVC.predict(feature_test)
-
-    name = st.text_input('Patient name:')
-    col1, col2, col3, col4, col5 = st.columns(5)
-
-    with col1:
-        A = st.number_input(label='MDVP:Fo(Hz)')
-        B = st.number_input(label='MDVP:Fhi(Hz)')
-        C = st.number_input(label='MDVP:Flo(Hz)')
-        D = st.number_input(label='MDVP:Jitter(%)')
-        E = st.number_input(label='MDVP:Jitter(Abs)')
+     st.image(r'https://th.bing.com/th/id/OIP.FrbaFXWHa1A_ud4-xPlfNwHaL4?w=156&h=194&c=7&r=0&o=5&dpr=1.3&pid=1.7')
+     
+     
     
+    with open('parkinson.pkl','wb') as file:
+        pickle.dump(df1,file)
+    with open('parkinson.pkl','rb') as file:
+        df=pickle.load(file)
+    #SELECTING TARGET AND FEATURE COLUMN
+    feature=df1.drop(['status','name'],axis=1)
+    target=df1['status']
+    #balancing the data using randomoversampling
+    feature_sampled,target_sampled=ros.fit_resample(feature,target)
+    #FEATURE SCALING THE FEATURE COLUMN
+    feature_x=scaler.fit_transform(feature_sampled)
+    target_y=target_sampled
+    
+
+#PREPROCESSING COMPLETED..
+
+    #TRAIN_TEST_SPLIT
+    feature_train,feature_test,target_train,target_test=train_test_split(feature_x,target_y)
+    #MODEL1-LOGISTIC REGRESSION
+    LR=LogisticRegression(C=0.4,max_iter=1000,solver='liblinear')
+  
+
+    #MODEL2-DECISIONTREECLASSIFIER
+    DTR=DecisionTreeClassifier()
+
+    #MODEL3-XGBOOST
+
+
+    #MODEL4-KNN
+    KNN=KNeighborsClassifier()
+   
+
+    #MODEL5-RANDOMFORESTCLASSIFIER
+    RFC=RandomForestClassifier(criterion='entropy',random_state=14)
+   
+    #MODEL6-SVM
+    SVM=SVC(probability=True)
+
+    
+
+    #VOTINGCLASSIFIER
+    EVC=VotingClassifier(estimators=[('LR',LR),('DTR',DTR),('KNN',KNN),('RFC',RFC),('SVM',SVM)],voting='hard')
+    EVC.fit(feature_train,target_train)
+    #PREDICTION
+    target_predevc=EVC.predict(feature_test)
+    
+    #ACCURACY
+    acc_evc=accuracy_score(target_test,target_predevc)
+    name=st.text_input('Patient name:')
+    col1,col2,col3,col4,col5=st.columns(5)
+    
+    
+    
+
+    with col1:
+    #    st.header('MDVP:Fo(HZ)')
+       A=st.number_input(label='MDVP:Fo(Hz)')
+       B=st.number_input(label='MDVP:Fhi(Hz)')
+       C=st.number_input(label='MDVP:Flo(Hz)')
+       D=st.number_input(label='MDVP:Jitter(%)')
+       
+       E=st.number_input(label='MDVP:Jitter(Abs)')
+       
+       
     with col2:
-        F = st.number_input(label='MDVP:RAP')
-        G = st.number_input(label='MDVP:PPQ')
-        H = st.number_input(label='Jitter:DDP')
-        I = st.number_input(label='MDVP:Shimmer')
-        J = st.number_input(label='MDVP:Shimmer(dB)')
+       F=st.number_input(label='MDVP:RAP')
+       G=st.number_input(label='MDVP:PPQ')
+       H=st.number_input(label='Jitter:DDP')
+       I=st.number_input(label='MDVP:Shimmer')
+       J=st.number_input(label='MDVP:Shimmer(dB)')
+       
 
     with col3:
-        K = st.number_input(label='Shimmer:APQ3')
-        L = st.number_input(label='Shimmer:APQ5')
-        M = st.number_input(label='MDVP:APQ')
-        N = st.number_input(label='Shimmer:DDA')
-        O = st.number_input(label='NHR')
+       K=st.number_input(label='Shimmer:APQ3')
+       L=st.number_input(label='Shimmer:APQ5')
+       M=st.number_input(label='MDVP:APQ')
+       N=st.number_input(label='Shimmer:DDA')
+       O=st.number_input(label='NHR')
 
     with col4:
-        P = st.number_input(label='spread2')
-        Q = st.number_input(label='HNR')
-        R = st.number_input(label='RPDE')
-        S = st.number_input(label='DFA')
-        T = st.number_input(label='spread1')
-
+       
+       Q=st.number_input(label='HNR')
+       R=st.number_input(label='RPDE')
+       S=st.number_input(label='DFA')
+       T=st.number_input(label='spread1')
+       P=st.number_input(label='spread2')
+    
     with col5:
-        U = st.number_input(label='D2')
-        V = st.number_input(label='PPE')
-
-    input_data = np.array([[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V]])
-
+       U=st.number_input(label='D2')
+       V=st.number_input(label='PPE')
+       
+    input_data=np.array([[A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V]])
+       
     if st.button('Predict'):
-        predict = EVC.predict(input_data)
-        if predict == 1:
-            with st.spinner('Predicting'):
-                st.error(f"Patient {name} has Parkinson's disease")
-        else:
-            with st.spinner('Prediction'):
-                st.success(f"Patient {name} does not have Parkinson's disease")
+     predict=EVC.predict(input_data)
+     if predict==1:
+        with st.spinner('Predicting'):
+         st.error(f"Patient {name} has Parkinson's disease")
+     else:
+        with st.spinner('Prediction'):
+         st.success(f"Patient {name} does not have parkinson's disease")
+     
+    
+if selected=='Kidney Prediction':
+   col1,col2=st.columns(2)
+   with col1:
+    st.title(':red[KIDNEY DISEASE PREDICTION]')   
+   with col2:
+    st.image(r'https://th.bing.com/th/id/OIP.vxeXslFQ0Rr0TYGPlcWfxgHaLb?w=156&h=195&c=7&r=0&o=5&dpr=1.3&pid=1.7')
+   
+   
+   path='Kidney.csv'
+   file=get_s3_file(bucket_name,path)
+   df=pd.read_csv(StringIO(file))
+  
+   feature=df[['sc','bu','hemo','al','bp']]
+   target1=df['classification']
+   colls=feature.columns
+   #HANDLING OULTILERS
+   feature_handled=handle_outliers_iqr(feature,colls)
+   #HANDLING NULL VALUES WITH MEAN
+   for i in feature_handled.columns:
+      feature_handled[i].fillna(feature_handled[i].mean(),inplace=True)
+      
+    #BALANCING THE DATA 
+   feature_sampled1,target_y1=ros.fit_resample(feature_handled,target1)
 
-if selected == 'Kidney Prediction':
-    col1, col2 = st.columns(2)
-    with col1:
-        st.title(':red[KIDNEY DISEASE PREDICTION]')   
-    with col2:
-        st.image(r'https://th.bing.com/th/id/OIP.vxeXslFQ0Rr0TYGPlcWfxgHaLb?w=156&h=195&c=7&r=0&o=5&dpr=1.3&pid=1.7')
-    path1 = 'Kidney.csv'
-    file1 = get_s3_file(bucket_name, path1)
+   #FEATURE SCALING
+   feature_x1=scaler1.fit_transform(feature_sampled1)
+#PREPROCESSING COMPLETED..
 
-    df1 = pd.read_csv(StringIO(file1))
+    #getting train,test samples
+   feature_train1,feature_test1,target_train1,target_test1=train_test_split(feature_x1,target_y1)
+       #MODEL1-LOGISTIC REGRESSION
+   LR=LogisticRegression(C=0.4,max_iter=1000,solver='liblinear')
+  
 
-    feature = df1[['sc', 'bu', 'hemo', 'al', 'bp']]
-    target1 = df1['classification']
-    colls = feature.columns
+    #MODEL2-DECISIONTREECLASSIFIER
+   DTR=DecisionTreeClassifier()
 
-    feature_handled = handle_outliers_iqr(feature, colls)
+    #MODEL4-KNN
+   KNN=KNeighborsClassifier()
+   
 
-    for i in feature_handled.columns:
-        feature_handled[i].fillna(feature_handled[i].mean(), inplace=True)
+    #MODEL5-RANDOMFORESTCLASSIFIER
+   RFC=RandomForestClassifier(criterion='entropy',random_state=14)
+   
+    #MODEL6-SVM
+   SVM=SVC(probability=True)
 
-    feature_sampled1, target_y1 = ros.fit_resample(feature_handled, target1)
-    feature_x1 = scaler1.fit_transform(feature_sampled1)
+   #VOTINGCLASSIFIER
+   EVC1=VotingClassifier(estimators=[('LR',LR),('DTR',DTR),('KNN',KNN),('RFC',RFC),('SVM',SVM)],voting='hard')
+   EVC1.fit(feature_train1,target_train1)
+    #PREDICTION
+   target_predevc1=EVC1.predict(feature_test1)
+   name=st.text_input('Patient name:')
+   col1,col2,col3,col4,col5=st.columns(5)
+    
+    
+    
 
-    feature_train1, feature_test1, target_train1, target_test1 = train_test_split(feature_x1, target_y1)
+   with col1:
+    #    st.header('MDVP:Fo(HZ)')
+       A=st.number_input(label='Serum Creatinine(sc)')
+   with col2:
+       B=st.number_input(label='Blood Urea(bu)')
+   with col3:
+       C=st.number_input(label='Hemoglobin')
+   with col4:
+       D=st.number_input(label='Albumin(al)')
+   with col5:
+       
+       E=st.number_input(label='BLoodPressure(bp)')
+       
+       
+  
+       
+   input_data=np.array([[A,B,C,D,E]])
+       
+   if st.button('Predict'):
+     predict1=EVC1.predict(input_data)
+     
+     if predict1=='ckd':
+        st.error(f"Patient {name} has Kidney disease")
+     else:
+        st.success(f"Patient {name} does not have Kidney disease")
 
-    LR = LogisticRegression(C=0.4, max_iter=1000, solver='liblinear')
-    DTR = DecisionTreeClassifier()
-    KNN = KNeighborsClassifier()
-    RFC = RandomForestClassifier(criterion='entropy', random_state=14)
-    SVM = SVC(probability=True)
+if selected=='Liver Prediction':
+   col1,col2=st.columns(2)
+   with col1:
+    st.title(':red[LIVER DISEASE PREDICTION]')
+   with col2:
+    st.image(r'https://th.bing.com/th/id/OIP.VmIE-LIbfDAO0jxNMY_JxwHaEl?w=260&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7')
+    
+  
+  
+  
+   feature=df2[['Total_Bilirubin','Direct_Bilirubin','Alkaline_Phosphotase','Aspartate_Aminotransferase','Albumin','Albumin_and_Globulin_Ratio']]
+   target=df2['Dataset']
 
-    EVC1 = VotingClassifier(estimators=[('LR', LR), ('DTR', DTR), ('KNN', KNN), ('RFC', RFC), ('SVM', SVM)], voting='hard')
-    EVC1.fit(feature_train1, target_train1)
+   #HANDLING OUTLIERS
+   cools=feature.columns
+   handledfeature=handle_outliers_iqr(feature,cools)
 
-    target_predevc1 = EVC1.predict(feature_test1)
-    name = st.text_input('Patient name:')
-    col1, col2, col3, col4, col5 = st.columns(5)
+   #HANDLING NULL VALUES
+   handledfeature['Albumin_and_Globulin_Ratio'].fillna(handledfeature['Albumin_and_Globulin_Ratio'].mean(),inplace=True)
+   
+   #BALANCING THE TARGET DATA
+   feature_sampled2,target_y2=ros.fit_resample(handledfeature,target)
 
-    with col1:
-        A = st.number_input(label='Serum Creatinine(sc)')
-    with col2:
-        B = st.number_input(label='Blood Urea(bu)')
-    with col3:
-        C = st.number_input(label='Hemoglobin')
-    with col4:
-        D = st.number_input(label='Albumin(al)')
-    with col5:
-        E = st.number_input(label='Blood Pressure(bp)')
+   #FEATURESCALING
+   feature_x2=scaler2.fit_transform(feature_sampled2)
+#PREPROCESSING COMPLETED
 
-    input_data = np.array([[A, B, C, D, E]])
+   feature_train2,feature_test2,target_train2,target_test2=train_test_split(feature_x2,target_y2)
+   #ALGORITHM SELECTION
+   #MODEL1-LOGISTIC REGRESSION
+   LR=LogisticRegression(C=0.4,max_iter=1000,solver='liblinear')
+  
 
-    if st.button('Predict'):
-        predict1 = EVC1.predict(input_data)
-        if predict1 == 'ckd':
-            st.error(f"Patient {name} has Kidney disease")
-        else:
-            st.success(f"Patient {name} does not have Kidney disease")
+    #MODEL2-DECISIONTREECLASSIFIER
+   DTR=DecisionTreeClassifier()
 
-if selected == 'Liver Prediction':
-    col1, col2 = st.columns(2)
-    with col1:
-        st.title(':red[LIVER DISEASE PREDICTION]')
-    with col2:
-        st.image(r'https://th.bing.com/th/id/OIP.VmIE-LIbfDAO0jxNMY_JxwHaEl?w=260&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7')
-    path2 = 'liver.csv'
-    file2 = get_s3_file(bucket_name, path2)
-    df2 = pd.read_csv(file2)
+    #MODEL4-KNN
+   KNN=KNeighborsClassifier()
+   
 
-    feature = df2[['Total_Bilirubin', 'Direct_Bilirubin', 'Alkaline_Phosphotase', 'Aspartate_Aminotransferase', 'Albumin', 'Albumin_and_Globulin_Ratio']]
-    target = df2['Dataset']
+    #MODEL5-RANDOMFORESTCLASSIFIER
+   RFC=RandomForestClassifier(criterion='entropy',random_state=14)
+   
+    #MODEL6-SVM
+   SVM=SVC(probability=True)
 
-    cools = feature.columns
-    handledfeature = handle_outliers_iqr(feature, cools)
+   #VOTINGCLASSIFIER
+   EVC2=VotingClassifier(estimators=[('LR',LR),('DTR',DTR),('KNN',KNN),('RFC',RFC),('SVM',SVM)],voting='hard')
+   EVC2.fit(feature_train2,target_train2)
+    #PREDICTION
+   target_predevc2=EVC2.predict(feature_test2)
+   name=st.text_input('Patient name:')
+   col1,col2,col3,col4,col5=st.columns(5)
+    
+    
+    
 
-    handledfeature['Albumin_and_Globulin_Ratio'].fillna(handledfeature['Albumin_and_Globulin_Ratio'].mean(), inplace=True)
+   with col1:
+    #    st.header('MDVP:Fo(HZ)')
+       A=st.number_input(label='Bilirubin')
+       F=st.number_input(label='Albumin & Globulin')
+   with col2:
+       B=st.number_input(label='Dir_Bilirubin')
+   with col3:
+       C=st.number_input(label='Alkaline_Phos')
+   with col4:
+       D=st.number_input(label='Aminotransferate')
+   with col5:
+       
+       E=st.number_input(label='Albumin')
+       
+       
+  
+       
+   input_data=np.array([[A,B,C,D,E,F]])
+       
+   if st.button('Predict'):
+     predict2=EVC2.predict(input_data)
+     
+     if predict2=='1':
+        st.error(f"Patient {name} has Liver disease")
+     else:
+        st.success(f"Patient {name} does not have Liver disease")
 
-    feature_sampled2, target_y2 = ros.fit_resample(handledfeature, target)
-    feature_x2 = scaler2.fit_transform(feature_sampled2)
 
-    feature_train2, feature_test2, target_train2, target_test2 = train_test_split(feature_x2, target_y2)
 
-    LR = LogisticRegression(C=0.4, max_iter=1000, solver='liblinear')
-    DTR = DecisionTreeClassifier()
-    KNN = KNeighborsClassifier()
-    RFC = RandomForestClassifier(criterion='entropy', random_state=14)
-    SVM = SVC(probability=True)
 
-    EVC2 = VotingClassifier(estimators=[('LR', LR), ('DTR', DTR), ('KNN', KNN), ('RFC', RFC), ('SVM', SVM)],
+
+
