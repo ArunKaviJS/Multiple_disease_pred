@@ -11,7 +11,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier ,VotingClassifier
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.svm import SVC
-form imblearn.over_sampling import RandomOverSampler
+from imblearn.over_sampling import RandomOverSampler
 from streamlit_option_menu import option_menu
 from io import StringIO
 
